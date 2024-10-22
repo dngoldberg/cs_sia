@@ -8,7 +8,7 @@ The functions solve the isothermal shallow-ice equations:
 
 $$ \frac{\partial H}{\partial t} + \nabla\cdot\vec{q} = \dot{a}. $$
 
-Here $H$ is ice thickness, i.e. $H = z_s - z_b$ where $z_s$ and $z_b$ are surface and bed elevation, resp. $\dot{a}$ is the \textit{surface mass balance}, the amount of accumulation or ablation of ice at a location. $\vec{q}$ is depth-integrated mass flux. According to the \textit{shallow-ice} approximation (SIA), this can be written
+Here $H$ is ice thickness, i.e. $H = z_s - z_b$ where $z_s$ and $z_b$ are surface and bed elevation, resp. $\dot{a}$ is the *surface mass balance*, the amount of accumulation or ablation of ice at a location. $\vec{q}$ is depth-integrated mass flux. According to the *shallow-ice* approximation (SIA), this can be written
 
 $$ q = -\frac{2A}{n+2} {\tau}_d^n H^2 $$
 
