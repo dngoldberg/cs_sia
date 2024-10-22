@@ -16,7 +16,7 @@ where ${\tau}_d$ is the *driving stress* $\rho_i g H \alpha$, with $\alpha$ the 
 
 Altogether this gives
 
-$$ \frac{\partial H}{\partial t} = \nabla\cdot(D\nabla(H+z_b)) + \dot{a}, $$
+$$ \frac{\partial H}{\partial t} = \nabla\cdot(D\nabla(H)) + \nabla\cdot(D\nabla(z_b)) + \dot{a} \quad (1), $$
 
 $$ D = \frac{2A}{n+2} (\rho_i g)^n |\nabla z_s|^{n-1} H^{n+2}. $$
 
@@ -24,3 +24,16 @@ The form of $q$ arises from several assumptions:
 - the ice sheet is a *power-law shear thinning* viscous rheology with $\dot{\varepsilon} = \tau^n$,
 - the only type of deformation that is important is *vertical shearing*,
 - there is no movement at the ice bed.
+
+### Numerical Scheme
+
+We start by integrating Equation (1) over a single computational cell ($C_{ij}$) to get:
+
+$$ \frac{\partial H_{i,j}}{\partial t} = \frac{1}{|C_{ij}|}\int_{\partial C_{ij}} D \nabla H \cdot \vec{n} ds + \frac{1}{|C_{ij}|}\int_{\partial C_{ij}} D \nabla z_b \cdot \vec{n} ds + \frac{1}{|C_{ij}|} \dot{a}. $$
+
+Now the 1st term on the right hand side can be discretised as
+
+$$ 
+-\frac{1}{|C_{ij}|\Delta x_{i-1/2,j}} \Delta y_{i-1/2,j} D_{i-1/2,j}(H_{ij}-H_{i-1,j}) +  \frac{1}{|C_{ij}|\Delta x_{i+1/2,j}} \Delta y_{i+1/2,j} D_{i+1/2,j}(H_{i+1,j}-H_{ij}) $$ 
+$$ -  \frac{1}{|C_{ij}|\Delta y_{i,j-1/2}} \Delta x_{i,j-1/2} D_{i,j-1/2}(H_{ij}-H_{i,j-1}) + \frac{1}{|C_{ij}|\Delta y_{i,j+1/2}} \Delta x_{i,j+1/2} D_{i,j+1/2}(H_{i,j+1}-H_{ij})
+$$
