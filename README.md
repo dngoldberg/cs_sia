@@ -12,7 +12,7 @@ Here $H$ is ice thickness, i.e. $H = z_s - z_b$ where $z_s$ is surface and bed e
 
 $$ q = -\frac{2A}{n+2} {\tau}_d^n H^2 $$
 
-where ${\tau}_d$ is the *driving stress* $\rho_i g H \alpha$, with $\alpha$ the surface slope; $A$ is the *Glen's Law* coefficient and $n$ is taken to be 3. (See Cuffey and Paterson 2011, Ch 8.)
+where ${\tau}_d$ is the *driving stress* $\rho_i g H \alpha$, with $\alpha$ the surface slope; $A$ is the *Glen's Law* coefficient and $n$ is taken to be 3. (See Cuffey and Paterson 2011, Ch 8.) The above does not consider basal sliding -- but there are common parameterisations used.
 
 Altogether this gives
 
@@ -60,6 +60,12 @@ $$ B_{ii} = 1 - \frac{1}{|C_{ij}|\Delta x_{c,i-1/2,j}} \Delta y_{i-1/2,j} D_{i-1
 
 $$ - \frac{1}{|C_{ij}|\Delta y_{c,i,j-1/2}} \Delta x_{i,j-1/2} D_{i,j-1/2} - \frac{1}{|C_{ij}|\Delta y_{c,i,j+1/2}} \Delta x_{i,j+1/2} D_{i,j+1/2}$$
 
+### Lateral boundary conditions
+
+There is nothing too complex about the boundary. A growing ice sheet will advance across an ice-free continent. An exception is a continental edge. We assume that ice thickness/surface in an adjacent ocean cell is always zero. Thus ice is allowed to flow into the ocean (and be lost to the sea) but will not expand.
+
+It is to be discussed whether this flux needs to be tracked for mass conservation. (Though there is no point in doing so if surface mass balance is not also conservative in terms of the ice-ocean-atmosphere system.)
+
 ### Numerical Scheme -- MATLAB details
 
 The difficulty in implementing such a scheme in MATLAB or Python is the notion of the 'east' and 'west' and 'north' and 'south' neighbors. Each grid cell has them.. but they cannot be found by incrementing rows and colums in an array. Rather, we transform all grid variables into 1D vectors, and adopt a consistent numbering of the cells. We access east, west, south and north positions through arrays of indices stored in the array `dof_matrix`.
@@ -71,3 +77,9 @@ The $\dot{a}$ field is generated with the `smb` function -- a very simple latitu
 ### Numerical Scheme -- Python details
 
 TBD
+
+## References
+
+Cuffey, Kurt M., and William Stanley Bryce Paterson. The physics of glaciers. Academic Press, 2010.
+
+
