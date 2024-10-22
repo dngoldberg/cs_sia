@@ -12,7 +12,7 @@ Here $H$ is ice thickness, i.e. $H = z_s - z_b$ where $z_s$ is surface and bed e
 
 $$ q = -\frac{2A}{n+2} {\tau}_d^n H^2 $$
 
-where ${\tau}_d$ is the *driving stress* $\rho_i g H \alpha$, with $\alpha$ the surface slope; $A$ is the *Glen's Law* coefficient and $n$ is taken to be 3. (See Cuffey and Paterson 2011, Ch 8.) The above does not consider basal sliding -- but there are common parameterisations used.
+where ${\tau}_d$ is the *driving stress* $\rho_i g H \alpha$, with $\alpha$ the surface slope; $A$ is the *Glen's Law* coefficient and $n$ is taken to be 3. (See Cuffey and Paterson 2011, Ch 8 for detail on how this equation arises.) The above does not consider basal sliding -- but there are common parameterisations used.
 
 Altogether this gives
 
