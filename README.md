@@ -59,3 +59,9 @@ For instance, the $i$ th diagonal entry of $B$, $B_{ii}$, is given by
 $$ B_{ii} = 1 - \frac{1}{|C_{ij}|\Delta x_{c,i-1/2,j}} \Delta y_{i-1/2,j} D_{i-1/2,j} - \frac{1}{|C_{ij}|\Delta x_{c,i+1/2,j}} \Delta y_{i+1/2,j} D_{i+1/2,j} $$
 
 $$ - \frac{1}{|C_{ij}|\Delta y_{c,i,j-1/2}} \Delta x_{i,j-1/2} D_{i,j-1/2} - \frac{1}{|C_{ij}|\Delta y_{c,i,j+1/2}} \Delta x_{i,j+1/2} D_{i,j+1/2}$$
+
+### Numerical Scheme -- MATLAB details
+
+The difficulty in implementing such a scheme in MATLAB or Python is the notion of the 'east' and 'west' and 'north' and 'south' neighbors. Each grid cell has them.. but they cannot be found by incrementing rows and colums in an array. Rather, we transform all grid variables into 1D vectors, and adopt a consistent numbering of the cells. We access east, west, south and north positions through arrays of indices.
+
+To solve the matrix, we do not actually form it, 
