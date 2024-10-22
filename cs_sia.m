@@ -1,30 +1,9 @@
-% N.Edge Facet  1 <-- W.Edge Facet  3 : pij=  0 -1  1  0 ; oi,oj=    33    32
-% S.Edge Facet  1 <-- N.Edge Facet  6 : pij=  1  0  0  1 ; oi,oj=     0   -32
-% E.Edge Facet  1 <-- W.Edge Facet  2 : pij=  1  0  0  1 ; oi,oj=    32     0
-% W.Edge Facet  1 <-- N.Edge Facet  5 : pij=  0  1 -1  0 ; oi,oj=   -32    33
-% N.Edge Facet  2 <-- S.Edge Facet  3 : pij=  1  0  0  1 ; oi,oj=     0    32
-% S.Edge Facet  2 <-- E.Edge Facet  6 : pij=  0 -1  1  0 ; oi,oj=    33   -32
-% E.Edge Facet  2 <-- S.Edge Facet  4 : pij=  0  1 -1  0 ; oi,oj=    32    33
-% W.Edge Facet  2 <-- E.Edge Facet  1 : pij=  1  0  0  1 ; oi,oj=   -32     0
-% N.Edge Facet  3 <-- W.Edge Facet  5 : pij=  0 -1  1  0 ; oi,oj=    33    32
-% S.Edge Facet  3 <-- N.Edge Facet  2 : pij=  1  0  0  1 ; oi,oj=     0   -32
-% E.Edge Facet  3 <-- W.Edge Facet  4 : pij=  1  0  0  1 ; oi,oj=    32     0
-% W.Edge Facet  3 <-- N.Edge Facet  1 : pij=  0  1 -1  0 ; oi,oj=   -32    33
-% N.Edge Facet  4 <-- S.Edge Facet  5 : pij=  1  0  0  1 ; oi,oj=     0    32
-% S.Edge Facet  4 <-- E.Edge Facet  2 : pij=  0 -1  1  0 ; oi,oj=    33   -32
-% E.Edge Facet  4 <-- S.Edge Facet  6 : pij=  0  1 -1  0 ; oi,oj=    32    33
-% W.Edge Facet  4 <-- E.Edge Facet  3 : pij=  1  0  0  1 ; oi,oj=   -32     0
-% N.Edge Facet  5 <-- W.Edge Facet  1 : pij=  0 -1  1  0 ; oi,oj=    33    32
-% S.Edge Facet  5 <-- N.Edge Facet  4 : pij=  1  0  0  1 ; oi,oj=     0   -32
-% E.Edge Facet  5 <-- W.Edge Facet  6 : pij=  1  0  0  1 ; oi,oj=    32     0
-% W.Edge Facet  5 <-- N.Edge Facet  3 : pij=  0  1 -1  0 ; oi,oj=   -32    33
-% N.Edge Facet  6 <-- S.Edge Facet  1 : pij=  1  0  0  1 ; oi,oj=     0    32
-% S.Edge Facet  6 <-- E.Edge Facet  4 : pij=  0 -1  1  0 ; oi,oj=    33   -32
-% E.Edge Facet  6 <-- S.Edge Facet  2 : pij=  0  1 -1  0 ; oi,oj=    32    33
-% W.Edge Facet  6 <-- E.Edge Facet  5 : pij=  1  0  0  1 ; oi,oj=   -32     0
-tic
 
+% dimension of a cs face
 cx = 32;
+
+% read the geometric arrays that give grid cell area, sides, 
+% and centre spacings
 subfold='GridMask_Laure';
 land=read_cs_bin([subfold '/mask_32x6x32.bin'],1,'real*8',cx);
 topo=read_cs_bin([subfold '/topo_malai_32x6x32.bin'],1,'real*8',cx);
@@ -36,10 +15,23 @@ DYG=read_cs_bin([subfold '/DYG.data'],1,'real*8',cx);
 XC=read_cs_bin([subfold '/XC.data'],1,'real*8',cx);
 YC=read_cs_bin([subfold '/YC.data'],1,'real*8',cx);
 
+% physical parameters 
+
+% Glen's law parameter: Pa^3 per year
+% this corresponds to *very* soft ice
+% +17 C according the Cuffey and Paterson relation!
+% and should be made a bit smaller..
 Aglen = 5e-15;
+
+% Exponent in Glens Law
 nglen = 3;
+
+% density x gravity
 rhog = 917*9.8;
+
 Csia = 2*Aglen/(nglen+2)*(rhog)^nglen;
+
+% model time step
 dt = 50;
 
 topol_file = 'topol.txt';
@@ -52,12 +44,17 @@ fid = fopen(topol_file, 'r');
 % Initialize an empty array to store the objects
 objArray = [];
 
+% N = 1
+% S = 2
+% E = 3
+% W = 4
+
 % classdef DataRow
 %     properties
-%         Field1
-%         Field3
-%         Field5
-%         Field7
+%         Field1 = Edge number (1 thru 6)
+%         Field2 = Face
+%         Field3 = Corresponding edge of neighbor facet
+%         Field4 = Neighbor facet
 %     end
 % end
 
@@ -89,7 +86,12 @@ fclose(fid);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-dict = containers.Map({'N.Edge' 'S.Edge' 'E.Edge' 'W.Edge'},[1 2 3 4]);
+dict = containers.Map( ...
+    {'N.Edge' 'S.Edge' 'E.Edge' 'W.Edge'},[1 2 3 4]);
+
+% Now turn these objects into an array for easy access
+
+%% (FACET, EDGE) --> NEIGHBOR FACET, NEIGHBOR EDGE
 
 facets = zeros(6,4,2);
 for i=1:24;
@@ -102,18 +104,22 @@ for i=1:24;
    
 end
 
-%% (FACET, EDGE) --> NEIGHBOR FACET, NEIGHBOR EDGE
-
+%% GENERATE LIST OF unique cell id's (Degrees Of Freedom)
 dofs = reshape(1:(cx*cx*6),[32 6 32]);
 
-
 %% DOF, NORTH/SOUTH/EAST/WEST NEIGHBOR
+%% following is set of matlab commands to generate
+%% a N x 5 matrix, where 
+%%   first column is dof ID
+%%   2nd   column is ID of north neigbor
+%%   3rd   column is ID of south neigbor
+%%   4th   column is ID of east  neigbor
+%%   5th   column is ID of west  neigbor
+%%
+%% a python implementation may differ
+
 dof_matrix = zeros(max(max(max(dofs))),5);
 dof_matrix(:,1) = 1:(cx^2*6);
-%dof_matrix(:,2) = reshape(noth_dofs,[cx^2*6 1]);
-%dof_matrix(:,3) = reshape(soth_dofs,[cx^2*6 1]);
-%dof_matrix(:,4) = reshape(east_dofs,[cx^2*6 1]);
-%dof_matrix(:,5) = reshape(west_dofs,[cx^2*6 1]);
 
 
 doffaces = zeros(32,32,6);
@@ -150,7 +156,7 @@ for i=1:6;
                 doffaces(end:-1:1,1,neighbor);
     end
 
-        % south edge
+    % south edge
     neighbor = facets(i,2,1);
     edge = facets(i,2,2);
     switch(edge)
@@ -186,7 +192,7 @@ for i=1:6;
                 doffaces(:,1,neighbor);
     end
 
-        % west edge
+    % west edge
     neighbor = facets(i,4,1);
     edge = facets(i,4,2);
     switch(edge)
@@ -212,8 +218,9 @@ for i=1:6;
 
 
 end
+%% FINISH GENERATING DOF_MATRIX
 
-% arrays to build linear solver
+%% CONVERGE GRID METRICS AND OTHER CS FIELDS TO VECTORS
 
 dxc = cs_to_vec(dofs,DXC);
 dyc = cs_to_vec(dofs,DYC);
@@ -230,17 +237,17 @@ flow2south = (land_vec == 1) & (land_vec(dof_matrix(:,3))==1);
 flow2east  = (land_vec == 1) & (land_vec(dof_matrix(:,4))==1);
 flow2west  = (land_vec == 1) & (land_vec(dof_matrix(:,5))==1);
 
+%% INITIALISE THICKNESS (h_vec)
+%% this way of initialisation would change in a coupled model
 h_vec = 10*ones(length(dof_matrix),1);
 h_vec(land_vec==0) = 0;
+
+%% SAVE INITIAL THICKNESS
 h_vec0 = h_vec;
 
-
-for it    =1:1000;
+for it=1:1000;
 
 % begin building linear system
-
-    
-    
     
     surf_vec = topo_vec + h_vec;
     
@@ -315,9 +322,16 @@ for it    =1:1000;
         - dt./rac(I) .* ...
             dyg(I)./dxc(dof_matrix(I,5)) .* Dx_west(I);
     
-    
+
+%% Acols give coefficients in a row for weights of corresponding cell and 
+%% its neighbors 
+%% .. although these do not correspond to matrix diagonals
     Acols = [Amat00 AmatNorth AmatSouth AmatEast AmatWest];
     func_handle = @(x) cgfunc(x,dof_matrix,Acols);
+
+%% A DIRECT SOLVE WOULD REQUIRE FORMING THE MATRIX
+%% WHICH DOES NOT HAVE A REGULAR SPARSITY PATTERN IN CS
+%% SO matrix *action* is implemented as a function, and an indirect solver is used
     [h_vecnew,cgflag,cgrelres,cgiter] = cgs(func_handle,Brhs);
     h_vecnew(h_vecnew<0) = 0;
     
@@ -331,7 +345,6 @@ end
 H = vec_to_cs(h_vec);
 H0 = vec_to_cs(h_vec0);
 
-toc
 
 figure(1); crossmap(H,[0 4000],'ice thickness after 5ky');
 [A ela] = smb(topo_vec,yc);
@@ -354,6 +367,7 @@ function cs = vec_to_cs (vec)
 end
 
 
+%% FUNCTION WHICH IMPLEMENTS MATRIX ACTION
 function y = cgfunc (x, varargin)
     
     dofs = varargin{1};
