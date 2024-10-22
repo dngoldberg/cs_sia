@@ -34,6 +34,28 @@ $$ \frac{\partial H_{i,j}}{\partial t} = \frac{1}{|C_{ij}|}\int_{\partial C_{ij}
 Now the 1st term on the right hand side can be discretised as
 
 $$ 
--\frac{1}{|C_{ij}|\Delta x_{i-1/2,j}} \Delta y_{i-1/2,j} D_{i-1/2,j}(H_{ij}-H_{i-1,j}) +  \frac{1}{|C_{ij}|\Delta x_{i+1/2,j}} \Delta y_{i+1/2,j} D_{i+1/2,j}(H_{i+1,j}-H_{ij}) $$ 
-$$ -  \frac{1}{|C_{ij}|\Delta y_{i,j-1/2}} \Delta x_{i,j-1/2} D_{i,j-1/2}(H_{ij}-H_{i,j-1}) + \frac{1}{|C_{ij}|\Delta y_{i,j+1/2}} \Delta x_{i,j+1/2} D_{i,j+1/2}(H_{i,j+1}-H_{ij})
+-\frac{1}{|C_{ij}|\Delta x_{c,i-1/2,j}} \Delta y_{i-1/2,j} D_{i-1/2,j}(H_{ij}-H_{i-1,j}) +  \frac{1}{|C_{ij}|\Delta x_{c,i+1/2,j}} \Delta y_{i+1/2,j} D_{i+1/2,j}(H_{i+1,j}-H_{ij}) $$ 
+$$ -  \frac{1}{|C_{ij}|\Delta y_{c,i,j-1/2}} \Delta x_{i,j-1/2} D_{i,j-1/2}(H_{ij}-H_{i,j-1}) + \frac{1}{|C_{ij}|\Delta y_{c,i,j+1/2}} \Delta x_{i,j+1/2} D_{i,j+1/2}(H_{i,j+1}-H_{ij}),
 $$
+
+where for instance $\Delta x_{i,j-1/2}$ is the width of the "south" (bottom) edge of the cell and $\Delta y_{i-1/2,j}$ of the "west" edge. Meanwhile $\Delta x_{c,i+1/2,j}$ is the distance from the cell center to the centre of the cell's "eastern" neighbor, and similarly for other distances. $D_{i-1/2,j}$ is the function $D$ evaluated at the western edge of the cell. (Actually $D$ is found in the centre of each cell in the code, and then averaged to cell edges.) $|C_{ij}|$ is cell area. the second term on the right hand side is evaluated similarly.
+
+The left hand side is approximated by 
+
+$$ \frac{H_{ij}^{(k+1)}-H_{ij}^{(k)}}{\Delta t} $$
+
+where the $k+1$ and $k$ superscript indicate time step $k$ and $k+1$. This raises the question of whether the $H$ terms on the right hand side are at time level $k$ or $k+1$. If the former, this is an explicit method, which is subject to instability when time steps are too small -- and is not recommended. 
+
+A "semi" implicity method is where the $H$ terms in the right hand side, such as $(H_{ij}-H_{i-1,j})$ and similar, are at level $k+1$, i.e. $(H_{ij}^{(k+1)}-H_{i-1,j}^{(k+1)})$ and the same for similar terms -- but the $D_{i-1/2,j}$ and similar, which depend on thickness, are found with $H^{(k)}$, as is the mass balance $\dot{a}$ (if applicable). 
+
+Multiplying through by $\Delta t$, we can then rearrange so all terms involving thickness at time $(k+1)$ on the left hand side.. and all else on the right. This forms a *linear system* 
+
+$$ \boldsymbol{B} H^{(k+1)} = r $$
+
+to be solved for the solution vector $H$ at time step $k+1$, where $B$ and $r$ are a matrix and vector, respectively, the elements of which can be found at time $(k)$. 
+
+For instance, the $i$ th diagonal entry of $B$, $B_{ii}$, is given by 
+
+$$ B_{ii} = 1 - \frac{1}{|C_{ij}|\Delta x_{c,i-1/2,j}} \Delta y_{i-1/2,j} D_{i-1/2,j} - \frac{1}{|C_{ij}|\Delta x_{c,i+1/2,j}} \Delta y_{i+1/2,j} D_{i+1/2,j} $$
+
+$$ - \frac{1}{|C_{ij}|\Delta y_{c,i,j-1/2}} \Delta x_{i,j-1/2} D_{i,j-1/2} - \frac{1}{|C_{ij}|\Delta y_{c,i,j+1/2}} \Delta x_{i,j+1/2} D_{i,j+1/2}$$
