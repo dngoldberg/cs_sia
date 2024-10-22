@@ -70,7 +70,7 @@ It is to be discussed whether this flux needs to be tracked for mass conservatio
 
 The difficulty in implementing such a scheme in MATLAB or Python is the notion of the 'east' and 'west' and 'north' and 'south' neighbors. Each grid cell has them.. but they cannot be found by incrementing rows and colums in an array. Rather, we transform all grid variables into 1D vectors, and adopt a consistent numbering of the cells. We access east, west, south and north positions through arrays of indices stored in the array `dof_matrix`.
 
-To solve the matrix, we do not actually form it, but store its coefficients in a 5-column matrix `Acols`. A user-defined function `cg_func` calculates the *action* of the matrix on a vector, using `dof_matrix`. The conjugate gradient method with a black-box operator then solves the linear system.
+To solve the matrix, we do not actually form it, but store its coefficients in a 5-column matrix `Acols`. A user-defined function `cg_func` calculates the *action* of the matrix on a vector -- that is, the right-multiplication of the matrix and vector -- using `dof_matrix`. The conjugate gradient method with a black-box operator then solves the linear system.
 
 The $\dot{a}$ field is generated with the `smb` function -- a very simple latitude- and height-dependent function.
 
