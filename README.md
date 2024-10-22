@@ -62,6 +62,12 @@ $$ - \frac{1}{|C_{ij}|\Delta y_{c,i,j-1/2}} \Delta x_{i,j-1/2} D_{i,j-1/2} - \fr
 
 ### Numerical Scheme -- MATLAB details
 
-The difficulty in implementing such a scheme in MATLAB or Python is the notion of the 'east' and 'west' and 'north' and 'south' neighbors. Each grid cell has them.. but they cannot be found by incrementing rows and colums in an array. Rather, we transform all grid variables into 1D vectors, and adopt a consistent numbering of the cells. We access east, west, south and north positions through arrays of indices.
+The difficulty in implementing such a scheme in MATLAB or Python is the notion of the 'east' and 'west' and 'north' and 'south' neighbors. Each grid cell has them.. but they cannot be found by incrementing rows and colums in an array. Rather, we transform all grid variables into 1D vectors, and adopt a consistent numbering of the cells. We access east, west, south and north positions through arrays of indices stored in the array `dof_matrix`.
 
-To solve the matrix, we do not actually form it, 
+To solve the matrix, we do not actually form it, but store its coefficients in a 5-column matrix `A_cols`. A user-defined function `cg_func` calculates the *action* of the matrix on a vector, using `dof_matrix`. The conjugate gradient method with a black-box operator then solves the linear system.
+
+The $\dot{a}$ field is generated with the `smb` function -- a very simple latitude- and height-dependent function.
+
+### Numerical Scheme -- Python details
+
+TBD
