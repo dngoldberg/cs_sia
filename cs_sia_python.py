@@ -344,6 +344,13 @@ flow2south = (land_vec == 1) & (land_vec[dof_matrix[:, 2] - 1] == 1)
 flow2east = (land_vec == 1) & (land_vec[dof_matrix[:, 3] - 1] == 1)
 flow2west = (land_vec == 1) & (land_vec[dof_matrix[:, 4] - 1] == 1)
 
+# Calculate flux to neighboring OCEAN cells based on land mask
+oflux2north = (land_vec == 1) & (land_vec[dof_matrix[:, 1] - 1] == 0)
+oflux2south = (land_vec == 1) & (land_vec[dof_matrix[:, 2] - 1] == 0)
+oflux2east  = (land_vec == 1) & (land_vec[dof_matrix[:, 3] - 1] == 0)
+oflux2west  = (land_vec == 1) & (land_vec[dof_matrix[:, 4] - 1] == 0)
+
+
 # Initialize thickness (h_vec)
 h_vec = 10 * np.ones(len(dof_matrix))
 h_vec[land_vec == 0] = 0
@@ -352,6 +359,7 @@ h_vec[land_vec == 0] = 0
 h_vec0 = h_vec.copy()
 
 def cgfunc(x, dofs, A_columns):
+
     """
     Implements matrix action for a subset of the degrees of freedom.
 
@@ -488,6 +496,28 @@ for it in range(1000):
     h_vecnew, cginfo = cgs(A, Brhs)
     h_vecnew[h_vecnew < 0] = 0
 
+    # Diagnose flux into ocean using new thickness
+
+    # oceanward mass flux at 0=north/1=south/2=east/3=west boundary of each cell
+    Oflux = np.zeros((len(h_vec),4))
+
+    I = oflux2north
+    Oflux[I,0] = dt * dxg[dof_matrix[I, 1] - 1] / dyc[I] * Dy_north[I] * \
+            (h_vecnew[dof_matrix[I, 1] - 1] - h_vecnew[I])
+
+    I = oflux2south
+    Oflux[I,1] = dt * dxg[I] / dyc[dof_matrix[I, 2] - 1] * Dy_south[I] * \
+            (h_vecnew[I] - h_vecnew[dof_matrix[I, 2] - 1])
+
+    I = oflux2east
+    Oflux[I,2] = dt * dyg[dof_matrix[I, 3] - 1] / dxc[I] * Dx_east[I] * \
+            (h_vecnew[dof_matrix[I, 3] - 1] - h_vecnew[I])
+
+    I = oflux2west
+    Oflux[I,3] = dt * dyg[I] / dxc[dof_matrix[I, 4] - 1] * Dx_west[I] * \
+            (h_vecnew[I] - h_vecnew[dof_matrix[I, 4] - 1])
+
+
     # Check for convergence information
     if cginfo < 0:
         print(f"CGS failed to converge, flag: {cginfo}")
@@ -498,6 +528,7 @@ for it in range(1000):
 
     # Update thickness
     h_vec = h_vecnew
+    print ('time = ' + str(it*dt) + ' years')
 
     
 H = vec_to_cs(h_vec)
@@ -559,4 +590,5 @@ def crossmap(TS, cx=None):
     ax_bottom.set_yticks([])
     
 crossmap(H)
+plt.show()
 
