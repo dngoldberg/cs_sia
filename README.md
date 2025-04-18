@@ -64,7 +64,11 @@ $$ - \frac{1}{|C_{ij}|\Delta y_{c,i,j-1/2}} \Delta x_{i,j-1/2} D_{i,j-1/2} - \fr
 
 There is nothing too complex about the boundary. A growing ice sheet will advance across an ice-free continent. An exception is a continental edge. We assume that ice thickness/surface in an adjacent ocean cell is always zero. Thus ice is allowed to flow into the ocean (and be lost to the sea) but will not expand.
 
-It is to be discussed whether this flux needs to be tracked for mass conservation. (Though there is no point in doing so if surface mass balance is not also conservative in terms of the ice-ocean-atmosphere system.)
+This flux can be recovered after thickness is updated; for instance,
+
+$$ \frac{1}{\Delta x_{c,i-1/2,j}}\Delta y_{i-1/2,j} D_{i-1/2,j}(H_{ij}-H_{i-1,j}) $$
+
+gives this flux (in cubic meters per year) to the west in cell ($$i,j$$).
 
 ### Numerical Scheme -- MATLAB details
 
